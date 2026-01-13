@@ -185,9 +185,9 @@ export default function ImageGallery() {
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 text-red-400 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-500/10 text-red-400 mb-4">
             <svg
-              className="w-6 h-6"
+              className="w-7 h-7"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -195,17 +195,17 @@ export default function ImageGallery() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </div>
-          <p className="text-red-400 text-sm mb-4">
+          <p className="text-red-400/80 text-sm mb-4">
             {error instanceof Error ? error.message : "Failed to load images"}
           </p>
           <button
             onClick={() => refetch()}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
+            className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white/80 text-sm font-medium transition-all duration-200"
           >
             Try Again
           </button>

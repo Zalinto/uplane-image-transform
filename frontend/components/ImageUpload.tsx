@@ -450,13 +450,13 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
               </svg>
             </div>
 
-            <h3 className="text-lg font-semibold text-white mb-2">
+            <h3 className="text-xl font-bold text-white mb-2">
               {isDragging ? "Drop your image here" : "Upload an image"}
             </h3>
-            <p className="text-white/50 text-sm mb-4">
+            <p className="text-white/70 text-sm mb-4">
               Drag and drop or click to browse
             </p>
-            <p className="text-white/30 text-xs">
+            <p className="text-white/50 text-xs">
               Supports: JPG, PNG, WEBP • Max 10MB
             </p>
           </div>
@@ -474,7 +474,7 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
 
         {/* Features - What happens when you upload */}
         <div className="mt-8">
-          <p className="text-center text-white/40 text-xs uppercase tracking-wider mb-4">
+          <p className="text-center text-white/60 text-[11px] font-semibold uppercase tracking-widest mb-5">
             Automatic Processing Pipeline
           </p>
           <div className="flex items-center justify-center gap-2">
