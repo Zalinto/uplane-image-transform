@@ -5,6 +5,7 @@ import { ImageService } from './image.service';
 import { BackgroundRemovalService } from './services/background-removal.service';
 import { ImageProcessingService } from './services/image-processing.service';
 import { StorageService } from './services/storage.service';
+import { DatabaseService } from './services/database.service';
 import { ConfigModule } from '@nestjs/config';
 import { PageIdGuard } from '../common/guards/page-id.guard';
 import { ConfigService } from '../config/config.service';
@@ -24,6 +25,7 @@ import { ConfigService } from '../config/config.service';
     BackgroundRemovalService,
     ImageProcessingService,
     StorageService,
+    DatabaseService,
     PageIdGuard,
     ConfigService,
   ],

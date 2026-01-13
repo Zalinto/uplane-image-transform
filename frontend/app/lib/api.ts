@@ -6,6 +6,38 @@ export interface UploadResponse {
   createdAt: string;
 }
 
+export interface ImageItem {
+  id: string;
+  url: string;
+  createdAt: string;
+  originalUrl: string;
+}
+
+export interface GetAllImagesResponse {
+  images: ImageItem[];
+}
+
+export async function getAllImages(): Promise<GetAllImagesResponse> {
+  const response = await fetch(`${API_BASE_URL}/image/records`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error || 'Failed to fetch images');
+  }
+
+  const data = await response.json();
+  return {
+    images: data.images.map((img: any) => ({
+      id: img.id,
+      url: img.processed_path,
+      createdAt: img.created_at,
+      originalUrl: img.original_path,
+    })),
+  };
+}
+
 export async function uploadImage(file: File, pageId: string): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append('file', file);

@@ -108,4 +108,12 @@ export class StorageService {
       throw new Error(`Image listing failed: ${error.message}`);
     }
   }
+
+  async getPublicUrl(filePath: string): Promise<string> {
+    const { data } = this.supabase.storage
+      .from(this.bucketName)
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  }
 }

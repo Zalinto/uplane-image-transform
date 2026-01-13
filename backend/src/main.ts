@@ -7,11 +7,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const frontendUrl = process.env.FRONTEND_URL;
+  const isProd = process.env.NODE_ENV === 'production';
 
   app.use(helmet());
 
   app.enableCors({
-    origin: frontendUrl || false,
+    origin: isProd ? frontendUrl || false : '*',
     methods: 'GET,POST,DELETE',
     credentials: true,
     maxAge: 3600,

@@ -130,12 +130,12 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
     setError(null);
   };
 
-  // Render processing progress
+    // Render processing progress
   if (isUploading) {
     const currentIndex = getStepIndex(currentStep);
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="w-full max-w-md p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 mb-4">
@@ -228,10 +228,10 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
     );
   }
 
-  // Render uploaded image result
+    // Render uploaded image result
   if (uploadedImage) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="w-full max-w-2xl p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 mb-4">
@@ -390,7 +390,7 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
 
   // Render upload drop zone
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="w-full h-full flex items-center justify-center">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">
