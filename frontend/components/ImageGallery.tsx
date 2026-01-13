@@ -15,8 +15,7 @@ const ComparisonSlider = ({
 }) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
-  console.log("Original", original);
-  console.log("Processed", processed);
+
   return (
     <div className="relative w-full h-full select-none overflow-hidden bg-black/20">
       <div className="absolute inset-0 flex items-center justify-center p-4">
@@ -246,7 +245,7 @@ export default function ImageGallery() {
                   alt={`Image ${image.id.split("/").pop()}`}
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 pointer-events-none z-30">
                   <div className="flex items-center justify-end gap-2 pointer-events-auto">
                     <a
                       href={image.url}
