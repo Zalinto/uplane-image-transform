@@ -16,13 +16,18 @@ export class ImageService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async processImage(file: Express.Multer.File, pageId?: string): Promise<{
+  async processImage(
+    file: Express.Multer.File,
+    pageId?: string,
+  ): Promise<{
     id: string;
     url: string;
     originalUrl: string;
     createdAt: Date;
   }> {
-    this.logger.log(`Processing image: ${file.originalname}${pageId ? ` for page ${pageId}` : ''}`);
+    this.logger.log(
+      `Processing image: ${file.originalname}${pageId ? ` for page ${pageId}` : ''}`,
+    );
 
     const imageId = uuidv4();
 
@@ -40,14 +45,12 @@ export class ImageService {
       );
 
       this.logger.log('Step 2: Removing background...');
-      const noBgImage = await this.backgroundRemovalService.removeBackground(
-        imageBuffer,
-      );
+      const noBgImage =
+        await this.backgroundRemovalService.removeBackground(imageBuffer);
 
       this.logger.log('Step 3: Flipping image horizontally...');
-      const flippedImage = await this.imageProcessingService.flipHorizontal(
-        noBgImage,
-      );
+      const flippedImage =
+        await this.imageProcessingService.flipHorizontal(noBgImage);
 
       this.logger.log('Step 4: Uploading processed image to Supabase...');
       const processedFolder = pageId ? `processed/${pageId}` : 'processed';
@@ -61,7 +64,7 @@ export class ImageService {
 
       this.logger.log('Step 5: Saving metadata to database...');
       const originalUrl = await this.storageService.getPublicUrl(originalPath);
-      await this.databaseService.createImage({
+      const dbRecord = await this.databaseService.createImage({
         original_path: originalPath,
         processed_path: processedPath,
         page_id: pageId,
@@ -70,10 +73,10 @@ export class ImageService {
       this.logger.log(`Image processed successfully: ${uploadResult.url}`);
 
       return {
-        id: uploadResult.id,
+        id: dbRecord.id, // Return database UUID, not storage path
         url: uploadResult.url,
         originalUrl,
-        createdAt: new Date(),
+        createdAt: dbRecord.createdAt,
       };
     } catch (error) {
       this.logger.error(`Failed to process image: ${error.message}`);
@@ -89,38 +92,69 @@ export class ImageService {
 
   async deleteImageRecord(dbId: string): Promise<void> {
     this.logger.log(`Deleting image record: ${dbId}`);
+
+    // Get the record first to find storage paths
+    const record = await this.databaseService.getImageById(dbId);
+    if (record) {
+      // Delete from storage
+      try {
+        await this.storageService.deleteImage(record.processedPath);
+        await this.storageService.deleteImage(record.originalPath);
+      } catch (storageError) {
+        this.logger.warn(
+          `Failed to delete storage files: ${storageError.message}`,
+        );
+      }
+    }
+
+    // Delete from database
     await this.databaseService.deleteImage(dbId);
   }
 
-  async getAllImages(): Promise<Array<{ id: string; url: string; originalUrl: string; createdAt: Date }>> {
+  async getAllImages(): Promise<
+    Array<{ id: string; url: string; originalUrl: string; createdAt: Date }>
+  > {
     this.logger.log('Getting all images');
     const records = await this.databaseService.getAllImages();
 
     return Promise.all(
-      records.map(async record => ({
+      records.map(async (record) => ({
         id: record.id,
         url: await this.storageService.getPublicUrl(record.processedPath),
-        originalUrl: await this.storageService.getPublicUrl(record.originalPath),
+        originalUrl: await this.storageService.getPublicUrl(
+          record.originalPath,
+        ),
         createdAt: new Date(record.createdAt),
-      }))
+      })),
     );
   }
 
-  async getAllImagesByPageId(pageId: string): Promise<Array<{ id: string; url: string; originalUrl: string; createdAt: Date }>> {
+  async getAllImagesByPageId(
+    pageId: string,
+  ): Promise<
+    Array<{ id: string; url: string; originalUrl: string; createdAt: Date }>
+  > {
     this.logger.log(`Getting images for page: ${pageId}`);
     const records = await this.databaseService.getAllImages(pageId);
 
     return Promise.all(
-      records.map(async record => ({
+      records.map(async (record) => ({
         id: record.id,
         url: await this.storageService.getPublicUrl(record.processedPath),
-        originalUrl: await this.storageService.getPublicUrl(record.originalPath),
+        originalUrl: await this.storageService.getPublicUrl(
+          record.originalPath,
+        ),
         createdAt: new Date(record.createdAt),
-      }))
+      })),
     );
   }
 
-  async getImageById(dbId: string): Promise<{ id: string; url: string; originalUrl: string; createdAt: Date } | null> {
+  async getImageById(dbId: string): Promise<{
+    id: string;
+    url: string;
+    originalUrl: string;
+    createdAt: Date;
+  } | null> {
     this.logger.log(`Getting image by id: ${dbId}`);
     const record = await this.databaseService.getImageById(dbId);
 

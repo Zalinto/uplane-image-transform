@@ -33,13 +33,12 @@ export async function getAllImages(): Promise<GetAllImagesResponse> {
 }
 
 export async function deleteImage(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/image/delete`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id }),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/image/records/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+    }
+  );
 
   if (!response.ok) {
     const error = await response.text();
