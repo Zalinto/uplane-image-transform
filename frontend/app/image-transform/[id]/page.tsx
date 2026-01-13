@@ -17,7 +17,7 @@ export default async function ImageTransformPage({
   return (
     <main className="h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden flex flex-col lg:flex-row">
       <div className="w-full lg:w-[40%] h-full border-b lg:border-b-0 lg:border-r border-white/10 bg-black/20 overflow-y-auto">
-        <div className="p-6">
+        <div className="pb-6 px-6">
           <ImageGallery />
         </div>
       </div>
