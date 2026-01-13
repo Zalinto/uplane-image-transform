@@ -3,7 +3,13 @@ import { ConfigService } from '../../config/config.service';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from '../../db/schema';
 import { eq, desc } from 'drizzle-orm';
-const postgres = require('postgres');
+import postgresModule from 'postgres';
+
+// Handle both ESM default export and CommonJS module
+const postgres =
+  typeof postgresModule === 'function'
+    ? postgresModule
+    : (postgresModule as any).default;
 
 @Injectable()
 export class DatabaseService {
