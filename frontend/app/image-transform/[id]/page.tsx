@@ -1,8 +1,12 @@
-import ImageUpload from "./components/ImageUpload";
-import ImageGallery from "./components/ImageGallery";
+import ImageUpload from "../../../components/ImageUpload";
+import ImageGallery from "../../../components/ImageGallery";
 import { notFound } from "next/navigation";
 
-export default async function ImageTransformPage({ params }: { params: { id: string } }) {
+export default async function ImageTransformPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { id } = await params;
   const allowedPageId = process.env.ALLOWED_PAGE_ID;
 

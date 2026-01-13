@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
 export interface UploadResponse {
   id: string;
@@ -19,59 +20,39 @@ export interface GetAllImagesResponse {
 
 export async function getAllImages(): Promise<GetAllImagesResponse> {
   const response = await fetch(`${API_BASE_URL}/image/records`, {
-    method: 'GET',
+    method: "GET",
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(error || 'Failed to fetch images');
+    throw new Error(error || "Failed to fetch images");
   }
 
   const data = await response.json();
-  return {
-    images: data.images.map((img: any) => ({
-      id: img.id,
-      url: img.processed_path,
-      createdAt: img.created_at,
-      originalUrl: img.original_path,
-    })),
-  };
-}
-
-export async function uploadImage(file: File, pageId: string): Promise<UploadResponse> {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('pageId', pageId);
-
-  const response = await fetch(`${API_BASE_URL}/image/upload`, {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || 'Failed to upload image');
-  }
-
-  return response.json();
+  return data;
 }
 
 export async function deleteImage(id: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/image/delete`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ id }),
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(error || 'Failed to delete image');
+    throw new Error(error || "Failed to delete image");
   }
 }
 
-export type ProcessingStep = 'removing_background' | 'flipping' | 'uploading' | 'complete' | null;
+export type ProcessingStep =
+  | "removing_background"
+  | "flipping"
+  | "uploading"
+  | "complete"
+  | null;
 
 export interface UploadProgress {
   step: ProcessingStep;
@@ -82,53 +63,53 @@ export interface UploadProgress {
 export async function uploadImageWithProgress(
   file: File,
   pageId: string,
-  onProgress?: (progress: UploadProgress) => void,
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<UploadResponse> {
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('pageId', pageId);
+  formData.append("file", file);
+  formData.append("pageId", pageId);
 
   if (onProgress) {
     onProgress({
-      step: 'removing_background',
+      step: "removing_background",
       fileName: file.name,
       fileSize: file.size,
     });
   }
 
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   if (onProgress) {
     onProgress({
-      step: 'flipping',
+      step: "flipping",
       fileName: file.name,
       fileSize: file.size,
     });
   }
 
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   if (onProgress) {
     onProgress({
-      step: 'uploading',
+      step: "uploading",
       fileName: file.name,
       fileSize: file.size,
     });
   }
 
   const response = await fetch(`${API_BASE_URL}/image/upload`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(error || 'Failed to upload image');
+    throw new Error(error || "Failed to upload image");
   }
 
   if (onProgress) {
     onProgress({
-      step: 'complete',
+      step: "complete",
       fileName: file.name,
       fileSize: file.size,
     });

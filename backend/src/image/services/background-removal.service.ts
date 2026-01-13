@@ -20,9 +20,13 @@ export class BackgroundRemovalService {
     this.logger.log('Removing background from image...');
 
     try {
+      // Convert Buffer to Uint8Array, then to Blob for FormData compatibility
+      const uint8Array = new Uint8Array(imageBuffer);
+      const blob = new Blob([uint8Array], { type: 'image/png' });
+
       const formData = new FormData();
       formData.append('size', 'auto');
-      formData.append('image_file', imageBuffer as any, 'input.png');
+      formData.append('image_file', blob, 'input.png');
 
       const response = await axios.post<Buffer>(this.apiEndpoint, formData, {
         headers: {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   uploadImageWithProgress,
   deleteImage,
@@ -24,19 +25,47 @@ function getStepIndex(step: ProcessingStep): number {
 }
 
 export default function ImageUpload({ pageId }: ImageUploadProps) {
+  const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [currentStep, setCurrentStep] = useState<ProcessingStep>(null);
   const [uploadedImage, setUploadedImage] = useState<UploadResponse | null>(
     null
   );
   const [error, setError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      return uploadImageWithProgress(file, pageId, (progress) => {
+        setCurrentStep(progress.step);
+      });
+    },
+    onSuccess: (result) => {
+      setUploadedImage(result);
+      setCurrentStep(null);
+      // Refetch the images query to update the gallery
+      queryClient.invalidateQueries({ queryKey: ["images"] });
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : "Upload failed");
+      setCurrentStep(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteImage,
+    onSuccess: () => {
+      setUploadedImage(null);
+      queryClient.invalidateQueries({ queryKey: ["images"] });
+    },
+    onError: (err) => {
+      setError(err instanceof Error ? err.message : "Delete failed");
+    },
+  });
+
   const handleFile = useCallback(
-    async (file: File) => {
+    (file: File) => {
       if (!file.type.startsWith("image/")) {
         setError("Please upload an image file");
         return;
@@ -48,26 +77,9 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
       }
 
       setError(null);
-      setIsUploading(true);
-      setCurrentStep(null);
-
-      try {
-        const result = await uploadImageWithProgress(
-          file,
-          pageId,
-          (progress) => {
-            setCurrentStep(progress.step);
-          }
-        );
-        setUploadedImage(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed");
-      } finally {
-        setIsUploading(false);
-        setCurrentStep(null);
-      }
+      uploadMutation.mutate(file);
     },
-    [pageId]
+    [uploadMutation]
   );
 
   const handleDrop = useCallback(
@@ -99,18 +111,9 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
     [handleFile]
   );
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!uploadedImage) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteImage(uploadedImage.id);
-      setUploadedImage(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteMutation.mutate(uploadedImage.id);
   };
 
   const handleCopyUrl = async () => {
@@ -130,8 +133,8 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
     setError(null);
   };
 
-    // Render processing progress
-  if (isUploading) {
+  // Render processing progress
+  if (uploadMutation.isPending) {
     const currentIndex = getStepIndex(currentStep);
 
     return (
@@ -228,7 +231,7 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
     );
   }
 
-    // Render uploaded image result
+  // Render uploaded image result
   if (uploadedImage) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -331,10 +334,10 @@ export default function ImageUpload({ pageId }: ImageUploadProps) {
             </button>
             <button
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={deleteMutation.isPending}
               className="px-4 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-medium text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {isDeleting ? (
+              {deleteMutation.isPending ? (
                 <>
                   <svg
                     className="w-4 h-4 animate-spin"

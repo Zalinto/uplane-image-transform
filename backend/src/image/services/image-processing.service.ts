@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import sharp from 'sharp';
+const sharp = require('sharp');
 
 @Injectable()
 export class ImageProcessingService {
@@ -9,9 +9,7 @@ export class ImageProcessingService {
     this.logger.log('Flipping image horizontally...');
 
     try {
-      const processedBuffer = await sharp(imageBuffer)
-        .flop()
-        .toBuffer();
+      const processedBuffer = await sharp(imageBuffer).flop().toBuffer();
 
       this.logger.log('Image flipped successfully');
 

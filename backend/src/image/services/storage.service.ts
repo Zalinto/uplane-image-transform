@@ -10,8 +10,14 @@ export class StorageService {
 
   constructor(private configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_ANON_KEY');
-    this.bucketName = this.configService.get<string>('SUPABASE_BUCKET_NAME', 'images');
+    // Use service role key to bypass RLS for backend operations
+    const supabaseKey =
+      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ||
+      this.configService.get<string>('SUPABASE_ANON_KEY');
+    this.bucketName = this.configService.get<string>(
+      'SUPABASE_BUCKET_NAME',
+      'images',
+    );
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase credentials are not configured');
@@ -76,7 +82,9 @@ export class StorageService {
     }
   }
 
-  async listAllImages(): Promise<Array<{ id: string; url: string; createdAt: Date }>> {
+  async listAllImages(): Promise<
+    Array<{ id: string; url: string; createdAt: Date }>
+  > {
     this.logger.log('Listing all images from bucket');
 
     try {
@@ -89,7 +97,7 @@ export class StorageService {
         throw new Error(`Failed to list images: ${error.message}`);
       }
 
-      const images = data.map(file => {
+      const images = data.map((file) => {
         const { data: urlData } = this.supabase.storage
           .from(this.bucketName)
           .getPublicUrl(file.name);

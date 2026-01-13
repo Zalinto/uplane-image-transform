@@ -12,10 +12,20 @@ export class PageIdGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    const body = request.body as { pageId?: string };
+    const body = request.body as { pageId?: string } | undefined;
     const allowedPageId = this.configService.get<string>('ALLOWED_PAGE_ID');
 
-    if (body.pageId !== allowedPageId) {
+    console.log('allowedPageId', allowedPageId);
+    // Allow if no pageId is configured (development mode)
+    if (!allowedPageId) {
+      return true;
+    }
+
+    const pageId = body?.pageId;
+
+    console.log('pageId', pageId);
+    console.log('allowedPageId', allowedPageId);
+    if (pageId !== allowedPageId) {
       throw new BadRequestException('Invalid pageId');
     }
 

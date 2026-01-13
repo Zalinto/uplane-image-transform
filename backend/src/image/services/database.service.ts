@@ -1,128 +1,83 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '../../config/config.service';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-export interface ImageRecord {
-  id: string;
-  original_path: string;
-  processed_path: string;
-  page_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateImageDto {
-  original_path: string;
-  processed_path: string;
-  page_id?: string;
-}
+import { drizzle } from 'drizzle-orm/postgres-js';
+import * as schema from '../../db/schema';
+import { eq, desc } from 'drizzle-orm';
+const postgres = require('postgres');
 
 @Injectable()
 export class DatabaseService {
   private readonly logger = new Logger(DatabaseService.name);
-  private readonly supabase: SupabaseClient;
+  private readonly db;
 
   constructor(private configService: ConfigService) {
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_ANON_KEY');
+    const supabaseUrl = this.configService.get<string>('DATABASE_URL');
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Supabase credentials are not configured');
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL is not configured');
     }
-
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    const client = postgres(supabaseUrl);
+    this.db = drizzle(client, { schema });
   }
 
-  async createImage(data: CreateImageDto): Promise<ImageRecord> {
+  async createImage(data: {
+    original_path: string;
+    processed_path: string;
+    page_id?: string;
+  }) {
     this.logger.log(`Creating image record: ${data.original_path}`);
 
-    const { data: result, error } = await this.supabase
-      .from('images')
-      .insert({
-        original_path: data.original_path,
-        processed_path: data.processed_path,
-        page_id: data.page_id,
+    const [result] = await this.db
+      .insert(schema.images)
+      .values({
+        originalPath: data.original_path,
+        processedPath: data.processed_path,
+        pageId: data.page_id,
       })
-      .select()
-      .single();
-
-    if (error) {
-      this.logger.error(`Failed to create image record: ${error.message}`);
-      throw new Error(`Failed to create image record: ${error.message}`);
-    }
+      .returning();
 
     this.logger.log(`Image record created: ${result.id}`);
     return result;
   }
 
-  async getAllImages(pageId?: string): Promise<ImageRecord[]> {
-    this.logger.log(`Fetching all images${pageId ? ` for page ${pageId}` : ''}`);
+  async getAllImages(pageId?: string) {
+    this.logger.log(
+      `Fetching all images${pageId ? ` for page ${pageId}` : ''}`,
+    );
 
-    let query = this.supabase
-      .from('images')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const results = await this.db
+      .select()
+      .from(schema.images)
+      .orderBy(desc(schema.images.createdAt));
 
-    if (pageId) {
-      query = query.eq('page_id', pageId);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      this.logger.error(`Failed to fetch images: ${error.message}`);
-      throw new Error(`Failed to fetch images: ${error.message}`);
-    }
-
-    this.logger.log(`Found ${data?.length || 0} images`);
-    return data || [];
+    this.logger.log(`Found ${results.length} images`);
+    return results;
   }
 
-  async getImageById(id: string): Promise<ImageRecord | null> {
+  async getImageById(id: string) {
     this.logger.log(`Fetching image: ${id}`);
 
-    const { data, error } = await this.supabase
-      .from('images')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const results = await this.db
+      .select()
+      .from(schema.images)
+      .where(eq(schema.images.id, id))
+      .limit(1);
 
-    if (error) {
-      this.logger.error(`Failed to fetch image: ${error.message}`);
-      throw new Error(`Failed to fetch image: ${error.message}`);
-    }
-
-    return data;
+    return results[0] || null;
   }
 
-  async deleteImage(id: string): Promise<void> {
+  async deleteImage(id: string) {
     this.logger.log(`Deleting image record: ${id}`);
 
-    const { error } = await this.supabase
-      .from('images')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      this.logger.error(`Failed to delete image record: ${error.message}`);
-      throw new Error(`Failed to delete image record: ${error.message}`);
-    }
+    await this.db.delete(schema.images).where(eq(schema.images.id, id));
 
     this.logger.log(`Image record deleted: ${id}`);
   }
 
-  async deleteByPageId(pageId: string): Promise<void> {
+  async deleteByPageId(pageId: string) {
     this.logger.log(`Deleting images for page: ${pageId}`);
 
-    const { error } = await this.supabase
-      .from('images')
-      .delete()
-      .eq('page_id', pageId);
-
-    if (error) {
-      this.logger.error(`Failed to delete images: ${error.message}`);
-      throw new Error(`Failed to delete images: ${error.message}`);
-    }
+    await this.db.delete(schema.images).where(eq(schema.images.pageId, pageId));
 
     this.logger.log(`Images deleted for page: ${pageId}`);
   }

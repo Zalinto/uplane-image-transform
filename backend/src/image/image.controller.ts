@@ -6,12 +6,12 @@ import {
   Body,
   UploadedFile,
   UseInterceptors,
-  UseGuards,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
   Param,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,12 +20,15 @@ import { ProcessedImageResponseDto } from '../dto/process-image-response.dto';
 import { DeleteImageDto } from '../dto/delete-image.dto';
 import { UploadImageDto } from '../dto/upload-image.dto';
 import { GetAllImagesResponseDto } from '../dto/list-images-response.dto';
-import { PageIdGuard } from '../common/guards/page-id.guard';
 import { ImageRecordDto } from '../dto/image-record.dto';
+import { ConfigService } from '../config/config.service';
 
 @Controller('image')
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  constructor(
+    private readonly imageService: ImageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get()
   async getAllImages(): Promise<GetAllImagesResponseDto> {
@@ -35,7 +38,6 @@ export class ImageController {
 
   @Post('upload')
   @Throttle({ default: { limit: 3, ttl: 300000 } })
-  @UseGuards(PageIdGuard)
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @UploadedFile(
@@ -49,6 +51,12 @@ export class ImageController {
     file: Express.Multer.File,
     @Body() uploadImageDto: UploadImageDto,
   ): Promise<ProcessedImageResponseDto> {
+    // Validate pageId after body is parsed
+    const allowedPageId = this.configService.get<string>('ALLOWED_PAGE_ID');
+    if (allowedPageId && uploadImageDto.pageId !== allowedPageId) {
+      throw new BadRequestException('Invalid pageId');
+    }
+
     const result = await this.imageService.processImage(
       file,
       uploadImageDto.pageId,

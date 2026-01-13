@@ -99,9 +99,9 @@ export class ImageService {
     return Promise.all(
       records.map(async record => ({
         id: record.id,
-        url: await this.storageService.getPublicUrl(record.processed_path),
-        originalUrl: await this.storageService.getPublicUrl(record.original_path),
-        createdAt: new Date(record.created_at),
+        url: await this.storageService.getPublicUrl(record.processedPath),
+        originalUrl: await this.storageService.getPublicUrl(record.originalPath),
+        createdAt: new Date(record.createdAt),
       }))
     );
   }
@@ -113,9 +113,9 @@ export class ImageService {
     return Promise.all(
       records.map(async record => ({
         id: record.id,
-        url: await this.storageService.getPublicUrl(record.processed_path),
-        originalUrl: await this.storageService.getPublicUrl(record.original_path),
-        createdAt: new Date(record.created_at),
+        url: await this.storageService.getPublicUrl(record.processedPath),
+        originalUrl: await this.storageService.getPublicUrl(record.originalPath),
+        createdAt: new Date(record.createdAt),
       }))
     );
   }
@@ -130,9 +130,9 @@ export class ImageService {
 
     return {
       id: record.id,
-      url: await this.storageService.getPublicUrl(record.processed_path),
-      originalUrl: await this.storageService.getPublicUrl(record.original_path),
-      createdAt: new Date(record.created_at),
+      url: await this.storageService.getPublicUrl(record.processedPath),
+      originalUrl: await this.storageService.getPublicUrl(record.originalPath),
+      createdAt: new Date(record.createdAt),
     };
   }
 }
