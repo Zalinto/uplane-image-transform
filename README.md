@@ -1,208 +1,274 @@
 # Uplane Image Transform
 
-A full-stack application for processing images with background removal and horizontal flipping.
+A production-ready full-stack application for automated image processing with AI-powered background removal and horizontal flipping.
 
-## Features
+![Next.js](https://img.shields.io/badge/Next.js-16.1-black?logo=next.js)
+![NestJS](https://img.shields.io/badge/NestJS-11-red?logo=nestjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)
+![Bun](https://img.shields.io/badge/Bun-1.3-orange?logo=bun)
 
-- **Image Upload**: Clean, intuitive drag-and-drop interface
-- **Background Removal**: Uses BackgroundErase API to remove image backgrounds
-- **Image Processing**: Automatically flips processed images horizontally
-- **Image Hosting**: Stores processed images on Supabase Storage
-- **Image Deletion**: Users can delete their uploaded and processed images
+## ✨ Features
 
-## Tech Stack
+- **Drag & Drop Upload** — Intuitive interface with visual feedback and file validation
+- **AI Background Removal** — Powered by Remove.bg API for professional-grade cutouts
+- **Auto Horizontal Flip** — Automatically mirrors processed images using Sharp
+- **Cloud Storage** — Secure image hosting on Supabase Storage
+- **Before/After Comparison** — Interactive slider to compare original and processed images
+- **Image Gallery** — View processing history with real-time updates via TanStack Query
+- **Delete Functionality** — Remove images from both storage and database with confirmation modal
+- **Page-Based Access Control** — Route protection using page ID validation
 
-### Frontend
-- Next.js 16 with App Router
-- TypeScript
-- Tailwind CSS v4
-- Bun for package management
-
-### Backend
-- NestJS
-- TypeScript
-- Sharp for image processing
-- Supabase for image storage
-- BackgroundErase API for background removal
-
-## Prerequisites
-
-- Node.js 18+ or Bun 1+
-- Supabase account (free tier)
-- BackgroundErase API key (free credits available)
-
-## Setup
-
-### 1. Backend Setup
-
-```bash
-cd backend
-
-# Install dependencies
-bun install
-
-# Create environment file
-cp .env.example .env
-
-# Edit .env and add your credentials:
-# - BACKGROUND_ERASE_API_KEY (get from https://backgrounderase.com)
-# - SUPABASE_URL (from Supabase project settings)
-# - SUPABASE_ANON_KEY (from Supabase project settings)
-# - SUPABASE_BUCKET_NAME (create a bucket named 'images' in Supabase)
-
-# Start development server
-bun run dev
-```
-
-Backend will run on http://localhost:3000/api/v1
-
-### 2. Frontend Setup
-
-```bash
-cd frontend
-
-# Install dependencies
-bun install
-
-# Create environment file
-cp .env.example .env
-
-# Edit .env and set backend URL (if different from localhost:3000):
-# - NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
-
-# Start development server
-bun run dev
-```
-
-Frontend will run on http://localhost:3001
-
-## API Endpoints
-
-### Upload Image
-```
-POST /api/v1/image/upload
-Content-Type: multipart/form-data
-
-Body:
-- file: Image file (PNG, JPG, GIF, max 10MB)
-
-Response:
-{
-  "id": "processed/uuid.png",
-  "url": "https://supabase-url/...",
-  "createdAt": "2024-01-01T00:00:00.000Z"
-}
-```
-
-### Delete Image
-```
-DELETE /api/v1/image/delete
-Content-Type: application/json
-
-Body:
-{
-  "id": "processed/uuid.png"
-}
-```
-
-## How It Works
-
-1. User uploads an image via the frontend interface
-2. Frontend sends image to backend `/api/v1/image/upload`
-3. Backend processes the image in three steps:
-   - Removes background using BackgroundErase API
-   - Flips image horizontally using Sharp
-   - Uploads to Supabase Storage
-4. Backend returns image ID and public URL
-5. Frontend displays processed image with download link
-6. User can delete the image using the delete button
-
-## Environment Variables
-
-### Backend (.env)
-```
-PORT=3000
-BACKGROUND_ERASE_API_KEY=your_key_here
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your_anon_key_here
-SUPABASE_BUCKET_NAME=images
-```
-
-### Frontend (.env.local)
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
-```
-
-## Development
-
-### Backend
-```bash
-cd backend
-bun run dev          # Start with watch mode
-bun run build        # Build for production
-bun run start:prod   # Run production build
-bun run test         # Run tests
-```
+## 🛠 Tech Stack
 
 ### Frontend
-```bash
-cd frontend
-bun run dev          # Start development server
-bun run build        # Build for production
-bun run start         # Start production server
-```
 
-## Supabase Setup
+| Technology      | Purpose                           |
+| --------------- | --------------------------------- |
+| Next.js 16      | React framework with App Router   |
+| TypeScript      | Type-safe development             |
+| TanStack Query  | Server state management & caching |
+| Tailwind CSS v4 | Utility-first styling             |
+| shadcn/ui       | Radix-based UI components         |
+| Bun             | Fast package management & runtime |
 
-1. Create a free account at https://supabase.com
-2. Create a new project
-3. Go to Storage → Create a new bucket named `images`
-4. Make the bucket public:
-   - Click on the bucket
-   - Toggle "Public bucket" to ON
-5. Get your credentials:
-   - Project URL: Settings → API → Project URL
-   - Anon Key: Settings → API → anon public key
+### Backend
 
-## BackgroundErase API Setup
+| Technology       | Purpose                           |
+| ---------------- | --------------------------------- |
+| NestJS 11        | Node.js framework                 |
+| Drizzle ORM      | Type-safe database queries        |
+| PostgreSQL       | Database (via Supabase)           |
+| Sharp            | High-performance image processing |
+| Supabase Storage | Cloud file storage                |
+| Remove.bg API    | AI background removal             |
 
-1. Sign up at https://backgrounderase.com
-2. Get your free API credits (they offer free trials)
-3. Copy your API key to backend `.env` file
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-.
+uplane-image-transform/
 ├── backend/
 │   ├── src/
+│   │   ├── common/guards/        # PageIdGuard for route protection
+│   │   ├── config/               # Configuration service
+│   │   ├── db/                   # Drizzle schema & migrations
+│   │   ├── dto/                  # Data transfer objects
+│   │   ├── health/               # Health check endpoint
 │   │   ├── image/
 │   │   │   ├── services/
 │   │   │   │   ├── background-removal.service.ts
+│   │   │   │   ├── database.service.ts
 │   │   │   │   ├── image-processing.service.ts
 │   │   │   │   └── storage.service.ts
 │   │   │   ├── image.controller.ts
-│   │   │   ├── image.service.ts
-│   │   │   └── dto/
+│   │   │   ├── image.module.ts
+│   │   │   └── image.service.ts
 │   │   ├── app.module.ts
 │   │   └── main.ts
-│   └── .env.example
+│   ├── drizzle/                  # Database migrations
+│   ├── vercel.json               # Vercel deployment config
+│   └── package.json
 ├── frontend/
 │   ├── app/
-│   │   ├── lib/
-│   │   │   └── api.ts
-│   │   ├── image-transform/[id]/
-│   │   │   ├── components/
-│   │   │   │   └── ImageUpload.tsx
-│   │   │   ├── page.tsx
-│   │   │   └── not-found.tsx
-│   │   ├── not-found.tsx
-│   │   ├── page.tsx
-│   │   └── layout.tsx
-│   └── .env.example
+│   │   ├── image-transform/[id]/ # Protected image transform page
+│   │   ├── lib/api.ts            # API client functions
+│   │   ├── providers.tsx         # React Query provider
+│   │   ├── globals.css           # Global styles + CSS variables
+│   │   └── layout.tsx            # Root layout
+│   ├── components/
+│   │   ├── ui/                   # shadcn/ui components
+│   │   ├── ImageGallery.tsx      # Gallery with comparison slider
+│   │   └── ImageUpload.tsx       # Upload interface
+│   ├── lib/utils.ts              # Utility functions
+│   └── package.json
 └── README.md
 ```
 
-## License
+## 🚀 Quick Start
 
-Private - All rights reserved
+### Prerequisites
+
+- [Bun](https://bun.sh) 1.0+ (recommended) or Node.js 18+
+- [Supabase](https://supabase.com) account (free tier)
+- [Remove.bg](https://www.remove.bg/api) API key
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/uplane-image-transform.git
+cd uplane-image-transform
+
+# Install backend dependencies
+cd backend && bun install
+
+# Install frontend dependencies
+cd ../frontend && bun install
+```
+
+### 2. Environment Setup
+
+**Backend** (`backend/.env`):
+
+```env
+PORT=8080
+DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres
+SUPABASE_URL=https://[project].supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_BUCKET_NAME=images
+REMOVE_BG_API_KEY=your_remove_bg_api_key
+ALLOWED_PAGE_ID=your-unique-page-id
+```
+
+**Frontend** (`frontend/.env`):
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+ALLOWED_PAGE_ID=your-unique-page-id
+```
+
+### 3. Supabase Setup
+
+1. Create a new Supabase project
+2. Create a storage bucket named `images` (make it **public**)
+3. Run the database migration:
+   ```bash
+   cd backend
+   bun run db:push
+   ```
+
+### 4. Run Development Servers
+
+```bash
+# Terminal 1 - Backend (runs on port 8080)
+cd backend
+bun run dev
+
+# Terminal 2 - Frontend (runs on port 3000)
+cd frontend
+bun run dev
+```
+
+Access the app at: `http://localhost:3000/image-transform/[your-page-id]`
+
+## 📡 API Reference
+
+### Base URL
+
+- **Development**: `http://localhost:8080/api/v1`
+- **Production**: `https://your-backend.vercel.app/api/v1`
+
+### Endpoints
+
+#### Upload Image
+
+```http
+POST /image/upload
+Content-Type: multipart/form-data
+
+file: <image file>
+pageId: <string>
+```
+
+**Response:**
+
+```json
+{
+  "id": "79900e49-b385-4650-bcb9-f3888fbad5a8",
+  "url": "https://[supabase]/storage/v1/object/public/images/processed/...",
+  "originalUrl": "https://[supabase]/storage/v1/object/public/images/original/...",
+  "createdAt": "2026-01-13T00:00:00.000Z"
+}
+```
+
+#### Get All Images
+
+```http
+GET /image/records
+```
+
+#### Get Image by ID
+
+```http
+GET /image/records/:id
+```
+
+#### Delete Image
+
+```http
+DELETE /image/records/:id
+```
+
+#### Health Check
+
+```http
+GET /health
+```
+
+## 🌐 Deployment
+
+### Vercel Deployment
+
+Both frontend and backend are configured for Vercel deployment.
+
+**Backend:**
+
+```bash
+cd backend
+bun run deploy
+```
+
+**Frontend:**
+
+```bash
+cd frontend
+bun run deploy
+```
+
+### Environment Variables on Vercel
+
+Set the same environment variables from your `.env` files in Vercel's project settings.
+
+## 🗄 Database Schema
+
+```sql
+CREATE TABLE images (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  original_path TEXT NOT NULL,
+  processed_path TEXT NOT NULL,
+  page_id TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+```
+
+## 🔒 Security Features
+
+- **Page ID Validation** — Routes are protected by page ID matching
+- **Service Role Key** — Backend uses Supabase service role for elevated permissions
+- **Rate Limiting** — NestJS Throttler guards against abuse
+- **CORS Configuration** — Configured for allowed origins
+- **Helmet** — Security headers middleware
+
+## 📜 Scripts
+
+### Backend
+
+| Script                | Description              |
+| --------------------- | ------------------------ |
+| `bun run dev`         | Start with hot reload    |
+| `bun run build`       | Build for production     |
+| `bun run deploy`      | Build + deploy to Vercel |
+| `bun run db:push`     | Push schema to database  |
+| `bun run db:generate` | Generate migrations      |
+
+### Frontend
+
+| Script           | Description          |
+| ---------------- | -------------------- |
+| `bun run dev`    | Start dev server     |
+| `bun run build`  | Build for production |
+| `bun run deploy` | Deploy to Vercel     |
+
+## 📄 License
+
+Private — All rights reserved.
