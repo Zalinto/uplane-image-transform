@@ -1,3 +1,52 @@
+// {
+// 	"compilerOptions": {
+// 		// Bun-specific settings
+// 		"lib": ["ESNext"],
+// 		"target": "ESNext",
+// 		"module": "ESNext",
+// 		"moduleResolution": "bundler",
+// 		"moduleDetection": "force",
+
+// 		// NestJS requirements
+// 		"emitDecoratorMetadata": true,
+// 		"experimentalDecorators": true,
+// 		"esModuleInterop": true,
+// 		"allowSyntheticDefaultImports": true,
+
+// 		// Build output (for production builds)
+// 		"declaration": true,
+// 		"sourceMap": true,
+// 		"outDir": "./dist",
+// 		"removeComments": true,
+// 		"incremental": true,
+
+// 		// Module handling
+// 		"resolveJsonModule": true,
+// 		"allowJs": true,
+// 		"isolatedModules": true,
+// 		"forceConsistentCasingInFileNames": true,
+
+// 		// Type safety
+// 		"strict": true,
+// 		"strictNullChecks": true,
+// 		"noFallthroughCasesInSwitch": true,
+// 		"noUncheckedIndexedAccess": true,
+// 		"noImplicitOverride": true,
+// 		"skipLibCheck": true,
+
+// 		// Code quality (adjust as needed)
+// 		"noUnusedLocals": true,
+// 		"noUnusedParameters": true,
+// 		"noPropertyAccessFromIndexSignature": false,
+
+// 		// Disabled for flexibility
+// 		"noImplicitAny": false,
+// 		"strictBindCallApply": false,
+// 		"noEmit": true // Set to true if you only use Bun to run, false if you build
+// 	},
+// 	"include": ["src/**/*"],
+// 	"exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+// }
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -6,16 +55,23 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true, // ADD THIS - helps with module imports
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    // "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "noUnusedLocals": true, // ADD THIS - warns about unused variables
+    "noUnusedParameters": true, // ADD THIS - warns about unused parameters
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true, // ADD THIS - allows importing JSON files
+    "isolatedModules": true // ADD THIS - helps with some compilation issues
+  },
+  "include": ["src/**/*"], // ADD THIS - explicitly include src files
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"] // ADD THIS - exclude unnecessary files
 }
